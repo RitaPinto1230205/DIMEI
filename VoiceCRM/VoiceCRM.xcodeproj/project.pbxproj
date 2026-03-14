@@ -10,9 +10,22 @@
 		699B391B2F65C2A700158823 /* VoiceCRM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceCRM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		699B39362F66044500158823 /* Exceptions for "VoiceCRM" folder in "VoiceCRM" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 699B391A2F65C2A700158823 /* VoiceCRM */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		699B391D2F65C2A700158823 /* VoiceCRM */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				699B39362F66044500158823 /* Exceptions for "VoiceCRM" folder in "VoiceCRM" target */,
+			);
 			path = VoiceCRM;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,7 @@
 				DEVELOPMENT_TEAM = 3DRHB6894B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VoiceCRM/Info.plist;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Esta aplicação precisa do microfone";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Esta aplicação precisa de reconhecimento de fala";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -290,6 +304,7 @@
 				DEVELOPMENT_TEAM = 3DRHB6894B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VoiceCRM/Info.plist;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Esta aplicação precisa do microfone";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Esta aplicação precisa de reconhecimento de fala";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

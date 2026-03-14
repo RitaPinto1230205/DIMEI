@@ -11,6 +11,7 @@ struct SpeechSegment: Identifiable {
     let index: Int
     let text: String
     let timestamp: Date
+    var speaker: String = "A identificar ..."
     
     var timeString: String {
         let formatter = DateFormatter()
@@ -221,6 +222,58 @@ struct ContentView: View {
         }
     }
     
+    func sendSegmentsToServer() {
+        guard !segments.isEmpty else { return }
+        
+        let serverURL = URL(string: "http://192.168.1.178:5001/analyse")!
+        var request = URLRequest(url: serverURL)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Prepara os segmentos para enviar
+        let segmentsData = segments.map { seg in
+            ["index": seg.index, "text": seg.text, "timestamp": seg.timeString] as [String: Any]
+        }
+        let body: [String: Any] = ["segments": segmentsData]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.statusMessage = "❌ \(error.localizedDescription)"
+                    print("ERRO SERVIDOR: \(error)")
+                }
+                return
+            }
+            if let response = response as? HTTPURLResponse {
+                print("STATUS HTTP: \(response.statusCode)")
+            }
+            if let data = data {
+                print("RESPOSTA: \(String(data: data, encoding: .utf8) ?? "vazio")")
+            }
+            if let data = data,
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let resultSegments = json["segments"] as? [[String: Any]] {
+                DispatchQueue.main.async {
+                    // Atualiza os segmentos com o locutor do servidor
+                    for result in resultSegments {
+                        if let index = result["index"] as? Int,
+                           let speaker = result["speaker"] as? String,
+                           let idx = self.segments.firstIndex(where: { $0.index == index }) {
+                            self.segments[idx] = SpeechSegment(
+                                index: self.segments[idx].index,
+                                text: self.segments[idx].text,
+                                timestamp: self.segments[idx].timestamp,
+                                speaker: speaker
+                            )
+                        }
+                    }
+                    self.statusMessage = "Análise concluída ✅"
+                }
+            }
+        }.resume()
+    }
+    
     func stopRecording() {
         silenceTimer?.invalidate()
         silenceTimer = nil
@@ -231,11 +284,16 @@ struct ContentView: View {
         recognitionTask?.cancel()
         isRecording = false
         statusMessage = "Gravação terminada — \(segmentCount) segmentos"
+        sendSegmentsToServer()
     }
 }
 
 struct SegmentView: View {
     let segment: SpeechSegment
+    
+    var speakerColor: Color {
+        segment.speaker == "Locutor A" ? .blue : .green
+    }
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -248,6 +306,10 @@ struct SegmentView: View {
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 4) {
+                Text(segment.speaker)
+                    .font(.caption)
+                    .bold()
+                    .foregroundStyle(speakerColor)
                 Text(segment.text)
                     .font(.body)
                     .frame(maxWidth: .infinity, alignment: .leading)
