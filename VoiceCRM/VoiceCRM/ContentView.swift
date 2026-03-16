@@ -34,7 +34,7 @@ struct ContentView: View {
     
     @State private var silenceTimer: Timer?
     @State private var lastTextChange = Date()
-    private let silenceThreshold: TimeInterval = 2.0
+    private let silenceThreshold: TimeInterval = 1.5
     
     var body: some View {
         NavigationView {
@@ -225,9 +225,10 @@ struct ContentView: View {
     func sendSegmentsToServer() {
         guard !segments.isEmpty else { return }
         
-        let serverURL = URL(string: "http://192.168.1.178:5001/analyse")!
+        let serverURL = URL(string: "http://192.168.1.105:5001/analyse")!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
+        
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // Prepara os segmentos para enviar
