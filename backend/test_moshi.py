@@ -1,10 +1,11 @@
-import torch
+import os
 from moshi.models import loaders
 
-print("A carregar Moshi...")
-moshi_weight = loaders.hf_hub_download(
-    repo_id='kyutai/moshiko-pytorch-bf16',
-    filename='model.safetensors'
-)
-print(f"Modelo encontrado: {moshi_weight}")
-print("✅ Moshi instalado com sucesso!")
+
+def test_moshi_model_downloads():
+    path = loaders.hf_hub_download(
+        repo_id='kyutai/moshiko-pytorch-bf16',
+        filename='model.safetensors'
+    )
+    assert os.path.exists(path), f"Modelo não encontrado em: {path}"
+    assert path.endswith('.safetensors')
