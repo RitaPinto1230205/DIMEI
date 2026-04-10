@@ -6,12 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6967F8792F7C7B5F005AAC53 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 6967F8782F7C7B5F005AAC53 /* FluidAudio */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		699B391B2F65C2A700158823 /* VoiceCRM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceCRM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		699B39362F66044500158823 /* Exceptions for "VoiceCRM" folder in "VoiceCRM" target */ = {
+		699B39532F7C2BF100158823 /* Exceptions for "VoiceCRM" folder in "VoiceCRM" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +28,7 @@
 		699B391D2F65C2A700158823 /* VoiceCRM */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				699B39362F66044500158823 /* Exceptions for "VoiceCRM" folder in "VoiceCRM" target */,
+				699B39532F7C2BF100158823 /* Exceptions for "VoiceCRM" folder in "VoiceCRM" target */,
 			);
 			path = VoiceCRM;
 			sourceTree = "<group>";
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6967F8792F7C7B5F005AAC53 /* FluidAudio in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = VoiceCRM;
 			packageProductDependencies = (
+				6967F8782F7C7B5F005AAC53 /* FluidAudio */,
 			);
 			productName = VoiceCRM;
 			productReference = 699B391B2F65C2A700158823 /* VoiceCRM.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 699B39122F65C2A700158823;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6967F8772F7C7B5F005AAC53 /* XCRemoteSwiftPackageReference "FluidAudio" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 699B391C2F65C2A700158823 /* Products */;
 			projectDirPath = "";
@@ -351,6 +360,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6967F8772F7C7B5F005AAC53 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6967F8782F7C7B5F005AAC53 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6967F8772F7C7B5F005AAC53 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			productName = FluidAudio;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 699B39132F65C2A700158823 /* Project object */;
 }

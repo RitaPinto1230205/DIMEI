@@ -5,18 +5,20 @@
 import SwiftUI
 import Speech
 import AVFoundation
+import FluidAudio
 
 struct SpeechSegment: Identifiable {
     let id = UUID()
     let index: Int
     let text: String
     let timestamp: Date
-    var speaker: String = "A identificar ..."
-    
+    var speaker: String = "A identificar..."
+    var audioOffset: Int = 0
+
     var timeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss"
-        return formatter.string(from: timestamp)
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm:ss"
+        return f.string(from: timestamp)
     }
 }
 
@@ -26,104 +28,89 @@ struct ContentView: View {
     @State private var segments: [SpeechSegment] = []
     @State private var statusMessage = "Pronto para gravar"
     @State private var segmentCount = 0
-    
+
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "pt-PT"))
     private let audioEngine = AVAudioEngine()
     @State private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     @State private var recognitionTask: SFSpeechRecognitionTask?
-    
     @State private var silenceTimer: Timer?
     @State private var lastTextChange = Date()
-    private let silenceThreshold: TimeInterval = 1.5
-    
+    private let silenceThreshold: TimeInterval = 1.0
+
+    @State private var recordingSampleRate: Double = 16000
+    @State private var allAudioSamples: [Float] = []
+
     var body: some View {
         NavigationView {
             VStack(spacing: 16) {
-                
                 if isRecording {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("A transcrever...")
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                        Text("A transcrever...").font(.caption).foregroundColor(.gray)
                         Text(currentText.isEmpty ? "..." : currentText)
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.blue.opacity(0.1))
                             .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
+                    }.padding(.horizontal)
                 }
-                
+
                 if segments.isEmpty {
                     Spacer()
                     Text("Os segmentos de fala vão aparecer aqui")
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
+                        .foregroundColor(.gray).multilineTextAlignment(.center)
                     Spacer()
                 } else {
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 10) {
-                                ForEach(segments) { segment in
-                                    SegmentView(segment: segment)
-                                        .id(segment.id)
+                                ForEach(segments) { seg in
+                                    SegmentView(segment: seg).id(seg.id)
                                 }
-                            }
-                            .padding(.horizontal)
+                            }.padding(.horizontal)
                         }
                         .onChange(of: segments.count) {
-                            if let last = segments.last {
-                                proxy.scrollTo(last.id, anchor: .bottom)
-                            }
+                            if let last = segments.last { proxy.scrollTo(last.id, anchor: .bottom) }
                         }
                     }
                 }
-                
-                Text(statusMessage)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                
+
+                Text(statusMessage).font(.caption).foregroundColor(.gray)
+
                 HStack(spacing: 20) {
                     Button(action: {
                         if isRecording {
                             stopRecording()
                         } else {
+                            allAudioSamples = []
                             startRecording()
                         }
                     }) {
                         Text(isRecording ? "⏹ Parar" : "🎙 Iniciar")
-                            .font(.title2)
-                            .bold()
-                            .foregroundColor(.white)
+                            .font(.title2).bold().foregroundColor(.white)
                             .frame(width: 160, height: 55)
                             .background(isRecording ? Color.red : Color.blue)
                             .cornerRadius(28)
                     }
-                    
                     if !segments.isEmpty {
                         Button(action: {
                             segments = []
                             segmentCount = 0
+                            allAudioSamples = []
                         }) {
                             Text("🗑 Limpar")
-                                .font(.title2)
-                                .foregroundColor(.white)
+                                .font(.title2).foregroundColor(.white)
                                 .frame(width: 120, height: 55)
-                                .background(Color.gray)
-                                .cornerRadius(28)
+                                .background(Color.gray).cornerRadius(28)
                         }
                     }
-                }
-                .padding(.bottom, 20)
+                }.padding(.bottom, 20)
             }
             .navigationTitle("Voice CRM")
             .navigationBarTitleDisplayMode(.large)
         }
-        .onAppear {
-            requestPermissions()
-        }
+        .onAppear { requestPermissions() }
     }
-    
+
     func requestPermissions() {
         SFSpeechRecognizer.requestAuthorization { status in
             DispatchQueue.main.async {
@@ -131,50 +118,19 @@ struct ContentView: View {
             }
         }
     }
-    
-    func startSilenceTimer() {
-        silenceTimer?.invalidate()
-        silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            let timeSinceLastChange = Date().timeIntervalSince(lastTextChange)
-            if timeSinceLastChange >= silenceThreshold && !currentText.isEmpty {
-                saveCurrentSegment()
-            }
-        }
-    }
-    
-    func saveCurrentSegment() {
-        guard !currentText.isEmpty else { return }
-        segmentCount += 1
-        let newSegment = SpeechSegment(
-            index: segmentCount,
-            text: currentText,
-            timestamp: Date()
-        )
-        DispatchQueue.main.async {
-            self.segments.append(newSegment)
-            self.currentText = ""
-            self.statusMessage = "Segmento \(self.segmentCount) guardado"
-        }
-        restartRecognition()
-    }
-    
+
     func startRecording() {
         recognitionTask?.cancel()
         recognitionTask = nil
-        
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-        } catch {
-            statusMessage = "Erro áudio: \(error.localizedDescription)"
-            return
-        }
-        
+
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.record, mode: .measurement, options: .duckOthers)
+        try? session.setActive(true, options: .notifyOthersOnDeactivation)
+
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        guard let recognitionRequest = recognitionRequest else { return }
+        guard let recognitionRequest else { return }
         recognitionRequest.shouldReportPartialResults = true
-        
+
         recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
             if let result = result {
                 DispatchQueue.main.async {
@@ -183,98 +139,31 @@ struct ContentView: View {
                     self.statusMessage = "A gravar..."
                 }
             }
-            if let error = error {
-                print("Erro: \(error)")
-                self.saveCurrentSegment()
-                if self.isRecording {
-                    self.restartRecognition()
-                }
-            }
+            if error != nil, self.isRecording { self.restartRecognition() }
         }
-        
+
         let inputNode = audioEngine.inputNode
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+        let fmt = inputNode.outputFormat(forBus: 0)
+        recordingSampleRate = fmt.sampleRate
+
+        inputNode.installTap(onBus: 0, bufferSize: 4096, format: fmt) { buffer, _ in
             recognitionRequest.append(buffer)
-        }
-        
-        audioEngine.prepare()
-        do {
-            try audioEngine.start()
-            isRecording = true
-            currentText = ""
-            statusMessage = "A gravar..."
-            startSilenceTimer()
-        } catch {
-            statusMessage = "Erro ao iniciar: \(error.localizedDescription)"
-        }
-    }
-    
-    func restartRecognition() {
-        audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
-        recognitionRequest?.endAudio()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if self.isRecording {
-                self.startRecording()
-            }
-        }
-    }
-    
-    func sendSegmentsToServer() {
-        guard !segments.isEmpty else { return }
-        
-        let serverURL = URL(string: "http://192.168.1.105:5001/analyse")!
-        var request = URLRequest(url: serverURL)
-        request.httpMethod = "POST"
-        
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Prepara os segmentos para enviar
-        let segmentsData = segments.map { seg in
-            ["index": seg.index, "text": seg.text, "timestamp": seg.timeString] as [String: Any]
-        }
-        let body: [String: Any] = ["segments": segmentsData]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
+            if let data = buffer.floatChannelData {
+                let frames = Int(buffer.frameLength)
+                let samples = Array(UnsafeBufferPointer(start: data[0], count: frames))
                 DispatchQueue.main.async {
-                    self.statusMessage = "❌ \(error.localizedDescription)"
-                    print("ERRO SERVIDOR: \(error)")
-                }
-                return
-            }
-            if let response = response as? HTTPURLResponse {
-                print("STATUS HTTP: \(response.statusCode)")
-            }
-            if let data = data {
-                print("RESPOSTA: \(String(data: data, encoding: .utf8) ?? "vazio")")
-            }
-            if let data = data,
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let resultSegments = json["segments"] as? [[String: Any]] {
-                DispatchQueue.main.async {
-                    // Atualiza os segmentos com o locutor do servidor
-                    for result in resultSegments {
-                        if let index = result["index"] as? Int,
-                           let speaker = result["speaker"] as? String,
-                           let idx = self.segments.firstIndex(where: { $0.index == index }) {
-                            self.segments[idx] = SpeechSegment(
-                                index: self.segments[idx].index,
-                                text: self.segments[idx].text,
-                                timestamp: self.segments[idx].timestamp,
-                                speaker: speaker
-                            )
-                        }
-                    }
-                    self.statusMessage = "Análise concluída ✅"
+                    self.allAudioSamples.append(contentsOf: samples)
                 }
             }
-        }.resume()
+        }
+
+        try? audioEngine.start()
+        isRecording = true
+        currentText = ""
+        statusMessage = "A gravar..."
+        startSilenceTimer()
     }
-    
+
     func stopRecording() {
         silenceTimer?.invalidate()
         silenceTimer = nil
@@ -284,39 +173,167 @@ struct ContentView: View {
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
         isRecording = false
-        statusMessage = "Gravação terminada — \(segmentCount) segmentos"
-        sendSegmentsToServer()
+        statusMessage = "A diarizar..."
+
+        let allSamples = allAudioSamples
+        let sr = recordingSampleRate
+
+        Task {
+            await runDiarization(samples: allSamples, sampleRate: sr)
+        }
+    }
+
+    func runDiarization(samples: [Float], sampleRate: Double) async {
+        let resampled = resampleTo16k(samples: samples, fromRate: sampleRate)
+        guard resampled.count > 32000 else {
+            DispatchQueue.main.async {
+                self.statusMessage = "Gravação terminada — \(self.segmentCount) segmentos"
+            }
+            return
+        }
+
+        do {
+            DispatchQueue.main.async { self.statusMessage = "A diarizar..." }
+
+            let config = DiarizerConfig(
+                clusteringThreshold: 0.7,
+                minSpeechDuration: 2.0,
+                minSilenceGap: 0.3
+            )
+            let models = try await DiarizerModels.downloadIfNeeded()
+            let diarizer = DiarizerManager(config: config)
+            diarizer.initialize(models: models)
+
+            let result = try diarizer.performCompleteDiarization(resampled)
+
+            print("Diarizer encontrou \(result.segments.count) segmentos")
+            for s in result.segments {
+                print("  Speaker \(s.speakerId): \(s.startTimeSeconds)s - \(s.endTimeSeconds)s")
+            }
+
+            DispatchQueue.main.async {
+                self.assignSpeakers(diarizationResult: result)
+            }
+        } catch {
+            print("Erro diarização: \(error)")
+            DispatchQueue.main.async {
+                self.statusMessage = "Gravação terminada — \(self.segmentCount) segmentos"
+            }
+        }
+    }
+
+    func assignSpeakers(diarizationResult: DiarizationResult) {
+        guard !segments.isEmpty else { return }
+
+        guard !diarizationResult.segments.isEmpty else {
+            for i in 0..<segments.count {
+                let seg = segments[i]
+                segments[i] = SpeechSegment(index: seg.index, text: seg.text,
+                                             timestamp: seg.timestamp, speaker: "Locutor A")
+            }
+            statusMessage = "Diarização concluída ✅ — \(segmentCount) segmentos"
+            return
+        }
+
+        var speakerMap: [String: String] = [:]
+        var nextLetter = 0
+
+        for i in 0..<segments.count {
+            let seg = segments[i]
+            // Usa posição no áudio em vez de timestamp do relógio
+            let segTime = Float(seg.audioOffset) / Float(recordingSampleRate)
+
+            print("Segmento \(i): audioTime=\(segTime)s texto=\(seg.text)")
+
+            var rawId = "\(diarizationResult.segments[0].speakerId)"
+            var bestDist: Float = .greatestFiniteMagnitude
+
+            for s in diarizationResult.segments {
+                let center = (s.startTimeSeconds + s.endTimeSeconds) / 2
+                let dist = abs(segTime - center)
+                if dist < bestDist {
+                    bestDist = dist
+                    rawId = "\(s.speakerId)"
+                }
+            }
+
+            if speakerMap[rawId] == nil {
+                speakerMap[rawId] = "Locutor \(String(UnicodeScalar(65 + nextLetter)!))"
+                nextLetter += 1
+            }
+
+            segments[i] = SpeechSegment(index: seg.index, text: seg.text,
+                                         timestamp: seg.timestamp,
+                                        speaker: speakerMap[rawId]!, audioOffset: seg.audioOffset)
+        }
+        statusMessage = "Diarização concluída ✅ — \(segmentCount) segmentos"
+    }
+
+    func restartRecognition() {
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if self.isRecording { self.startRecording() }
+        }
+    }
+
+    func startSilenceTimer() {
+        silenceTimer?.invalidate()
+        silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            if Date().timeIntervalSince(lastTextChange) >= silenceThreshold && !currentText.isEmpty {
+                saveCurrentSegment()
+            }
+        }
+    }
+
+    func saveCurrentSegment() {
+        guard !currentText.isEmpty else { return }
+        segmentCount += 1
+        var seg = SpeechSegment(index: segmentCount, text: currentText, timestamp: Date())
+        seg.audioOffset = allAudioSamples.count
+        segments.append(seg)
+        currentText = ""
+        statusMessage = "Segmento \(segmentCount) guardado"
+        restartRecognition()
+    }
+
+    func resampleTo16k(samples: [Float], fromRate: Double) -> [Float] {
+        guard fromRate != 16000 else { return samples }
+        let ratio = 16000.0 / fromRate
+        let outCount = Int(Double(samples.count) * ratio)
+        guard outCount > 0 else { return [] }
+        var output = [Float](repeating: 0, count: outCount)
+        for i in 0..<outCount {
+            let srcIdx = Double(i) / ratio
+            let lo = Int(srcIdx)
+            let hi = min(lo + 1, samples.count - 1)
+            let frac = Float(srcIdx - Double(lo))
+            output[i] = samples[lo] * (1 - frac) + samples[hi] * frac
+        }
+        return output
     }
 }
 
 struct SegmentView: View {
     let segment: SpeechSegment
-    
     var speakerColor: Color {
-        segment.speaker == "Locutor A" ? .blue : .green
+        if segment.speaker.contains("A") { return .blue }
+        if segment.speaker.contains("B") { return .green }
+        if segment.speaker.contains("C") { return .orange }
+        return .purple
     }
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Text("\(segment.index)")
-                .font(.caption)
-                .bold()
-                .foregroundColor(.white)
+                .font(.caption).bold().foregroundColor(.white)
                 .frame(width: 28, height: 28)
-                .background(Color.blue)
-                .clipShape(Circle())
-            
+                .background(speakerColor).clipShape(Circle())
             VStack(alignment: .leading, spacing: 4) {
-                Text(segment.speaker)
-                    .font(.caption)
-                    .bold()
-                    .foregroundStyle(speakerColor)
-                Text(segment.text)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text(segment.timeString)
-                    .font(.caption2)
-                    .foregroundColor(.gray)
+                Text(segment.speaker).font(.caption).bold().foregroundStyle(speakerColor)
+                Text(segment.text).font(.body).frame(maxWidth: .infinity, alignment: .leading)
+                Text(segment.timeString).font(.caption2).foregroundColor(.gray)
             }
         }
         .padding(12)
@@ -325,6 +342,4 @@ struct SegmentView: View {
     }
 }
 
-#Preview {
-    ContentView()
-}
+#Preview { ContentView() }
