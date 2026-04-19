@@ -19,4 +19,6 @@ dependencies = [
     "uvicorn>=0.42.0",
     "python-multipart>=0.0.22",
     "python-dotenv>=1.2.2",
+    "pyannote-core>=6.0.1",
+    "pyannote-metrics>=4.0.0",
 ]

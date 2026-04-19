@@ -10,6 +10,7 @@ Output: SpeakerEncoder.mlpackage  (drag into Xcode)
 import torch
 import torch.nn as nn
 import coremltools as ct
+import numpy as np
 from speechbrain.pretrained import EncoderClassifier
 
 print("Loading ECAPA-TDNN...")
@@ -22,41 +23,45 @@ classifier.eval()
 
 
 class SpeakerEncoderWrapper(nn.Module):
-    """Wraps the full pipeline: raw audio (16kHz mono) -> normalized embedding."""
+    """Wraps only the embedding model — feats (mel filterbank) -> embedding.
+    compute_features and mean_var_norm excluded — data-dependent control flow
+    breaks torch.jit.trace. Mel features computed separately in Swift.
+    """
     def __init__(self, classifier):
         super().__init__()
-        self.compute_features = classifier.mods["compute_features"]
-        self.mean_var_norm = classifier.mods["mean_var_norm"]
         self.embedding_model = classifier.mods["embedding_model"]
-        self.mean_var_norm_emb = classifier.mods["mean_var_norm_emb"]
 
-    def forward(self, wav):
-        # wav: (1, time) — mono 16kHz
-        feats = self.compute_features(wav)                          # (1, frames, 80)
-        lens = torch.ones(feats.shape[0])
-        feats = self.mean_var_norm(feats, lens)                     # normalise
-        embedding = self.embedding_model(feats)                     # (1, 1, 192)
-        embedding = self.mean_var_norm_emb(embedding, lens)         # normalise
-        embedding = embedding.squeeze()                             # (192,)
-        # L2 normalise
-        return embedding / embedding.norm()
+    def forward(self, feats):
+        # feats: (1, frames, 80) — mel filterbank features at 16kHz
+        embedding = self.embedding_model(feats)
+        embedding = embedding.squeeze()
+        norm = embedding.norm()
+        result = embedding / (norm + 1e-8)
+        return result.float()
 
 
 model = SpeakerEncoderWrapper(classifier).eval()
 
-# Trace with 2s of audio at 16kHz
-dummy_input = torch.randn(1, 32000)
+dummy_input = torch.randn(1, 100, 80)
 with torch.no_grad():
     traced = torch.jit.trace(model, dummy_input)
+    test_out = traced(dummy_input)
+    print(f"Traced model test — shape: {test_out.shape} | primeiros 5: {test_out[:5].tolist()}")
 
 print("Converting to CoreML...")
 mlmodel = ct.convert(
     traced,
-    inputs=[ct.TensorType(name="audio", shape=(1, ct.RangeDim(8000, 160000)))],
+    inputs=[ct.TensorType(name="feats", shape=(1, ct.RangeDim(50, 2000), 80))],
     outputs=[ct.TensorType(name="embedding")],
-    minimum_deployment_target=ct.target.iOS16,
+    compute_precision=ct.precision.FLOAT32,
+    minimum_deployment_target=ct.target.iOS15,
 )
 
 mlmodel.short_description = "ECAPA-TDNN speaker embedding — VoiceCRM"
 mlmodel.save("SpeakerEncoder.mlpackage")
 print("✅ Saved: SpeakerEncoder.mlpackage — drag into Xcode!")
+
+loaded = ct.models.MLModel("SpeakerEncoder.mlpackage")
+test_feats = np.random.randn(1, 100, 80).astype(np.float32)
+result = loaded.predict({"feats": test_feats})
+print(f"Verificação Python — primeiros 5: {result['embedding'][:5]}")

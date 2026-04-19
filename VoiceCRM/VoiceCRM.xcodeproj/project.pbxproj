@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6967F8792F7C7B5F005AAC53 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 6967F8782F7C7B5F005AAC53 /* FluidAudio */; };
+		695C81C12F9534230098013B /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 695C81C02F9534230098013B /* FluidAudio */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6967F8792F7C7B5F005AAC53 /* FluidAudio in Frameworks */,
+				695C81C12F9534230098013B /* FluidAudio in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +83,7 @@
 			);
 			name = VoiceCRM;
 			packageProductDependencies = (
-				6967F8782F7C7B5F005AAC53 /* FluidAudio */,
+				695C81C02F9534230098013B /* FluidAudio */,
 			);
 			productName = VoiceCRM;
 			productReference = 699B391B2F65C2A700158823 /* VoiceCRM.app */;
@@ -114,7 +114,7 @@
 			mainGroup = 699B39122F65C2A700158823;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				6967F8772F7C7B5F005AAC53 /* XCRemoteSwiftPackageReference "FluidAudio" */,
+				695C81BF2F9534230098013B /* XCRemoteSwiftPackageReference "FluidAudio" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 699B391C2F65C2A700158823 /* Products */;
@@ -286,6 +286,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -321,6 +322,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -362,7 +364,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6967F8772F7C7B5F005AAC53 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
+		695C81BF2F9534230098013B /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
 			requirement = {
@@ -373,9 +375,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6967F8782F7C7B5F005AAC53 /* FluidAudio */ = {
+		695C81C02F9534230098013B /* FluidAudio */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 6967F8772F7C7B5F005AAC53 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			package = 695C81BF2F9534230098013B /* XCRemoteSwiftPackageReference "FluidAudio" */;
 			productName = FluidAudio;
 		};
 /* End XCSwiftPackageProductDependency section */
