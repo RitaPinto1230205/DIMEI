@@ -29,6 +29,7 @@ struct ContentView: View {
     @State private var recognitionTask: SFSpeechRecognitionTask?
     @State private var silenceTimer: Timer?
     @State private var lastTextChange = Date()
+    @State private var diarizationTimer: Timer?
 
     private let silenceThreshold: TimeInterval = 0.85
 
@@ -285,12 +286,16 @@ struct ContentView: View {
         statusMessage = "A gravar..."
 
         startSilenceTimer()
+        startDiarizationTimer()
     }
 
     func stopRecording() {
         silenceTimer?.invalidate()
         silenceTimer = nil
 
+        diarizationTimer?.invalidate()
+                diarizationTimer = nil
+        
         saveCurrentSegment(shouldRestartRecognition: false)
 
         audioEngine.stop()
@@ -323,6 +328,20 @@ struct ContentView: View {
         }
     }
 
+    func startDiarizationTimer() {
+            diarizationTimer?.invalidate()
+            diarizationTimer = Timer.scheduledTimer(withTimeInterval: 8.0, repeats: true) { _ in
+                guard self.isEnrolled, !self.consultantEnrollmentSamples16k.isEmpty else { return }
+                let samples = self.resampleTo16k(
+                    samples: self.allAudioSamples,
+                    fromRate: self.recordingSampleRate
+                )
+                guard samples.count > 16000 * 3 else { return }
+                Task { await self.diarizeAndUpdateSegments(conversationSamples16k: samples) }
+            }
+        }
+
+    
     func restartRecognition(after delay: TimeInterval = 0.15) {
         guard isRecording else { return }
         guard !isRestartingRecognition else { return }
@@ -441,7 +460,11 @@ struct ContentView: View {
                     }
                 }
 
-                statusMessage = "Gravação terminada — \(segmentCount) segmentos"
+                if isRecording {
+                                    statusMessage = "A gravar... (\(segmentCount) segmentos)"
+                                } else {
+                                    statusMessage = "Gravação terminada — \(segmentCount) segmentos"
+                                }
             }
         } catch {
             await MainActor.run {
