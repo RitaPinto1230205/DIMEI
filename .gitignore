@@ -26,3 +26,5 @@ DerivedData/
 *.bin
 *.pt
 *.pth
+
+pretrained_models/.env

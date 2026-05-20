@@ -21,4 +21,5 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "pyannote-core>=6.0.1",
     "pyannote-metrics>=4.0.0",
+    "groq>=1.2.0",
 ]
