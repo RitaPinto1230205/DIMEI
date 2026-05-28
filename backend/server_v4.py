@@ -3,9 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pyannote.core import Annotation, Segment
 from pyannote.metrics.diarization import DiarizationErrorRate
 from pydantic import BaseModel
+from dotenv import load_dotenv
 import os
 import json
 from groq import Groq
+
+load_dotenv()
 
 app = FastAPI(title="VoiceCRM API", version="4.0")
 
@@ -15,136 +18,133 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-from dotenv import load_dotenv
-load_dotenv()
-groq_client = Groq(api_key=os.getenv("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"))
+
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "message": "VoiceCRM backend ready for LLM integration"}
+    return {"status": "ok", "message": "VoiceCRM backend ready"}
+
 
 @app.post("/extract")
 def extract(data: dict):
-    """
-    Recebe segmentos transcritos e extrai dados CRM via LLM.
-    Input:  { segments: [{ speaker, text, timestamp }] }
-    Output: { client_profile, products_mentioned, purchase_intent, follow_up_actions, summary }
-    """
-
     segments = data.get("segments", [])
-
     if not segments:
         return {"error": "no segments provided"}
 
-# junta todos os segmentos numa transcrição legível
     transcript = "\n".join([
         f"{seg['speaker']}: {seg['text']}"
         for seg in segments
     ])
 
-# prompt que envia ao LLM
-    prompt = f"""És um assistente especializado em retalho de luxo.
-Analisa esta conversa entre um consultor e um cliente de uma loja de luxo e extrai informação relevante para o CRM.
+    prompt = f"""You are a specialist assistant for luxury retafrom fastapi import FastAPI
+from fastapi.middleware.cors ALfrom fastapi.middleware.co.
+from pyannote.core import Annotation, Segment
+frolifrom pyannote.metrics.diarization import Diaiefrom pydantic import BaseModel
+from dotenv import load_doten",from dotenv import load_doten  import os
+import json
+from gr "import jeffrom groq []
+load_dotenv()
 
-CONVERSA:
-{transcript}
+app efe
+app = FastA
+  
+app.add_middleware(
+    CORSMiddleware,
+    allo       CORshoes": "",
+            "other":     allow_methods=["*"]      allow_headers=["*"]
+ )
 
-Responde APENAS com um JSON válido com esta estrutura:
+groq_client = Groq(a: [],
+
+@app.get("/health")
+def health():
+    return {"staequedef health():
+          return {at
+
+@app.post("/extract")
+def extract(data: dict):
+    segments =me":def extract(data: dica    segments = data.get "    if not segments:
+        return {" "        return       
+    transcript = "\n".join([
+        f"{seg['sten        f"{seg['speaker']}:en        for seg in segments
+    ])
+
+    pt_    ])
+
 {{
-    "client_profile": {{
-        "gender": "",
-        "age_range": "",
-        "residence": "",
-        "client_tier": "",
-        "style_preferences": [],
-        "fabric_preferences": [],
-        "sizes": {{
-            "clothing": "",
-            "shoes": "",
-            "other": ""
-        }}
-    }},
-    "purchase_history": {{
-        "products_owned": [],
-        "estimated_spend": "",
-        "purchase_frequency": ""
-    }},
-    "family_relations": [
-        {{
-            "relation": "",
-            "name": "",
-            "occasions": [],
-            "preferences": []
-        }}
-    ],
-    "memories": [
-        {{
-            "category": "",
-            "content": "",
-            "date_mentioned": ""
-        }}
-    ],
-    "current_visit": {{
-        "products_mentioned": [],
-        "purchase_intent": "high/medium/low",
-        "budget_range": "",
-        "occasion": ""
-    }},
+        "products_mentionfrom fastapi.middleware.cors ALfrom fastapi.middleware.co.
+from pyannote.core import Anno  from pyannote.core import Annotation, Segment
+frolifrom psufrolifrom pyannote.metrics.diarization imporerfrom dotenv import load_doten",from dotenv import load_doten  import os
+import jroimport json
+from gr "import jeffrom groq []
+load_dotenv()
 
-    "follow_up_actions": [],
-    "summary": ""
-}}"""
-    
-# prompt que envia ao LLM
-    response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.1,
-        max_tokens=1000
-    )
+app efe
+app,
+from gr "issload_dotenv()
 
-    try:
-        content = response.choices[0].message.content.strip()
-        # remove markdown se o modelo devolver ```json ... ```
-        if content.startswith("```"):
-            content = content.split("```")[1]
-            if content.startswith("json"):
-                content = content[4:]
-        result = json.loads(content.strip())
-    except json.JSONDecodeError:
-        result = {"raw": response.choices[0].message.content}
+app efe
+app = Ft"
+app efe
+app   app = em  
+app.add.1a
+     CORSMiddleware20    allo       COR
+             "other":     alloi )
 
-    return result
+groq_client = Groq(a: [],
 
+@app.get("/health")
+def health():
+   
+ 
+   
+@app.get("/health")
+def.spdef health():
+          return {te          return {at
 
-# ── DER endpoint ──────────────────────────────────────────────────────────────
+@app.post(       content = contentdef extract(data: di=     segments =me":def ep(        return {" "        return       
+    transcript = "\n".join([
+        f"{segsa    transcript = "\n".join([
+        f"Di        f"{seg['sten       :
+    ])
 
-class DiarizationSegment(BaseModel):
-    start: float
-    end: float
-    speaker: str
+    pt_    ])
 
+{{
+        "products_mentionfrom fastapi.middleware.el
+ 
+    r
+{{
+        st[ iafrom pyannote.core import Anno  from pyannote.core import Annotation, Segment
+frolcafrolifrom psufrolifrom pyannote.metrics.diarization imporerfrom dotenv imporq.import jroimport json
+from gr "import jeffrom groq []
+load_dotenv()
 
-class DERRequest(BaseModel):
-    reference: list[DiarizationSegment]
-    hypothesis: list[DiarizationSegment]
+app efe
+app,
+from gr "issload_dotenv()
 
+app efe
+app = Ft"
+aesifrom gr "import jeffs[load_dotenv()
 
-@app.post("/der")
-def calculate_der(req: DERRequest):
+app efe
+app,
+f= seg.speaker
 
-    reference = Annotation()
-    for seg in req.reference:
-        reference[Segment(seg.start, seg.end)] = seg.speaker
+   app,
+fc = Dia
+app efe
+app = Ft"
+app eresapp = meapp efe
+erapp   hyapp.add.1a
+    re     CORS               "other":     alloi )
 
-    hypothesis = Annotation()
-    for seg in req.hypothesis:
-        hypothesis[Segment(seg.start, seg.end)] = seg.speaker
+gro  
+groq_client = Groq(a: [],
 
-    metric = DiarizationErrorRate()
-    result = metric(reference, hypothesis)
+@app}"
 
-    return {
-        "der": round(float(result), 4),
-        "der_percent": f"{result:.1%}"
-    }
+   }
