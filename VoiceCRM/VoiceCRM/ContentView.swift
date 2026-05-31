@@ -93,7 +93,7 @@ struct ContentView: View {
     @State private var diarizationTimer: Timer?
 
     private let silenceThreshold: TimeInterval = 1
-    private let backendURL = "http://192.168.1.87:5003"
+    private let backendURL = "http://192.168.1.87:5011"
 
     @State private var recordingSampleRate: Double = 16000
     @State private var currentSegmentSamples: [Float] = []
