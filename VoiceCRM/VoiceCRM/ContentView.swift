@@ -93,7 +93,7 @@ struct ContentView: View {
     @State private var diarizationTimer: Timer?
 
     private let silenceThreshold: TimeInterval = 1
-    private let backendURL = "http://192.168.1.87:5011"
+    private let backendURL = "http://192.168.1.95:5003"
 
     @State private var recordingSampleRate: Double = 16000
     @State private var currentSegmentSamples: [Float] = []
@@ -272,12 +272,19 @@ struct ContentView: View {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 60
+        request.timeoutInterval = 120
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: ["segments": segmentsPayload])
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
             
+            // ── DEBUG TEMPORÁRIO ──────────────────────────────────────
+                   if let httpResponse = response as? HTTPURLResponse {
+                       print("🔵 HTTP Status: \(httpResponse.statusCode)")
+                   }
+                   if let jsonString = String(data: data, encoding: .utf8) {
+                       print("🟡 Resposta raw:\n\(jsonString)")
+                   }
     
             if let profile = try? JSONDecoder().decode(CRMProfile.self, from: data) {
                 await MainActor.run {
@@ -420,7 +427,7 @@ struct ContentView: View {
 
     func startDiarizationTimer() {
         diarizationTimer?.invalidate()
-        diarizationTimer = Timer.scheduledTimer(withTimeInterval: 8.0, repeats: true) { _ in
+        diarizationTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { _ in
             guard self.isEnrolled, !self.consultantEnrollmentSamples16k.isEmpty else { return }
             let samples = self.resampleTo16k(samples: self.allAudioSamples, fromRate: self.recordingSampleRate)
             guard samples.count > 16000 * 3 else { return }
@@ -523,7 +530,54 @@ struct ContentView: View {
 struct CRMResultView: View {
     let profile: CRMProfile
     @Environment(\.dismiss) private var dismiss
+    @State private var showShareOptions = false
+    @State private var shareContent: String = ""
+    @State private var showShareSheet = false
 
+    // MARK: - Export
+
+    func exportText() -> String {
+        var lines: [String] = ["=== DADOS CRM - VoiceCRM ===\n"]
+        if let s = profile.summary { lines.append("RESUMO\n\(s)\n") }
+        if let cp = profile.client_profile {
+            lines.append("PERFIL DO CLIENTE")
+            if let v = cp.gender { lines.append("Género: \(v)") }
+            if let v = cp.age_range { lines.append("Faixa etária: \(v)") }
+            if let v = cp.residence { lines.append("Residência: \(v)") }
+            if let v = cp.client_tier { lines.append("Tier: \(v)") }
+            if let v = cp.style_preferences { lines.append("Estilo: \(v.joined(separator: ", "))") }
+            if let v = cp.fabric_preferences { lines.append("Tecidos: \(v.joined(separator: ", "))") }
+            if let s = cp.sizes {
+                if let v = s.clothing { lines.append("Tamanho roupa: \(v)") }
+                if let v = s.shoes { lines.append("Tamanho calçado: \(v)") }
+            }
+            lines.append("")
+        }
+        if let cv = profile.current_visit {
+            lines.append("VISITA ATUAL")
+            if let v = cv.products_mentioned { lines.append("Produtos: \(v.joined(separator: ", "))") }
+            if let v = cv.purchase_intent { lines.append("Intenção de compra: \(v)") }
+            if let v = cv.budget_range { lines.append("Orçamento: \(v)") }
+            if let v = cv.occasion { lines.append("Ocasião: \(v)") }
+            lines.append("")
+        }
+        if let actions = profile.follow_up_actions, !actions.isEmpty {
+            lines.append("PRÓXIMAS AÇÕES")
+            actions.forEach { lines.append("• \($0)") }
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    func exportJSON() -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        if let data = try? encoder.encode(profile),
+           let json = String(data: data, encoding: .utf8) {
+            return json
+        }
+        return "{}"
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -616,6 +670,27 @@ struct CRMResultView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Fechar") { dismiss() }
                 }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showShareOptions = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                }
+            }
+            .confirmationDialog("Exportar dados CRM", isPresented: $showShareOptions) {
+                Button("📄 Ficha de Cliente (texto legível)") {
+                    shareContent = exportText()
+                    showShareSheet = true
+                }
+                Button("⚙️ Formato CRM (importável)") {
+                    shareContent = exportJSON()
+                    showShareSheet = true
+                }
+                Button("Cancelar", role: .cancel) {}
+            }
+            .sheet(isPresented: $showShareSheet) {
+                ShareSheet(items: [shareContent])
             }
         }
     }
@@ -775,6 +850,14 @@ struct SegmentView: View {
         }
         .padding(12).background(Color(.systemGray6)).cornerRadius(10)
     }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
 
 #Preview { ContentView() }
