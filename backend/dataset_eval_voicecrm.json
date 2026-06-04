@@ -1,0 +1,674 @@
+{
+  "dataset_info": {
+    "name": "VoiceCRM Golden Evaluation Dataset",
+    "version": "2.0",
+    "description": "Conversas sinteticas entre consultor e cliente de retalho de luxo (Chanel). Ground truth corrigido: genero explicito, residencia simplificada, family_relations com schema correcto, purchase_intent sempre em ingles.",
+    "num_conversations": 5,
+    "language": "pt-PT",
+    "corrections_v2": [
+      "Genero mencionado explicitamente em todas as conversas",
+      "Residencia simplificada para cidade unica",
+      "family_relations sempre com schema {relation, name, occasions, preferences}",
+      "purchase_intent sempre em ingles (high/medium/low)",
+      "Tamanhos sempre em formato numerico"
+    ]
+  },
+  "conversations": [
+    {
+      "id": "conv_001",
+      "title": "Cliente habitual — aniversário do marido",
+      "segments": [
+        {
+          "speaker": "Consultor",
+          "text": "Bom dia, Dra. Mariana! Que bom vê-la por cá.",
+          "timestamp": "10:02:15"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Bom dia! Vim do escritório, sou advogada e trabalho aqui perto no Porto.",
+          "timestamp": "10:02:22"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Que a traz hoje?",
+          "timestamp": "10:02:30"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Tenho um almoço amanhã para o aniversário do meu marido. Ele faz cinquenta anos. Quero estar impecável.",
+          "timestamp": "10:02:38"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Tem preferência de estilo ou tecido?",
+          "timestamp": "10:02:50"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Clássico, discreto. Adoro tweed e seda. Uso o 38 na roupa e 36 em sapatos.",
+          "timestamp": "10:02:58"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Tenho um conjunto de seda azul-marinho da nova colecção.",
+          "timestamp": "10:03:10"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Perfeito. Ah, o meu filho faz dezoito anos em Julho, queria oferecer-lhe algo da Chanel. Ele usa 42 e gosta de streetwear com classe.",
+          "timestamp": "10:03:20"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Tem orçamento em mente?",
+          "timestamp": "10:03:35"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Para mim dois a três mil euros. Para o filho oitocentos a mil.",
+          "timestamp": "10:03:50"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Posso reservar opções para o filho e entrar em contacto?",
+          "timestamp": "10:04:02"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Sim. O meu nome é Mariana Ferreira.",
+          "timestamp": "10:04:10"
+        }
+      ],
+      "ground_truth": {
+        "client_profile": {
+          "gender": "feminino",
+          "age_range": "40-50",
+          "residence": "Porto",
+          "client_tier": "VIP",
+          "style_preferences": [
+            "clássico",
+            "discreto"
+          ],
+          "fabric_preferences": [
+            "tweed",
+            "seda"
+          ],
+          "sizes": {
+            "clothing": "38",
+            "shoes": "36",
+            "other": null
+          }
+        },
+        "purchase_history": {
+          "products_owned": [],
+          "estimated_spend": "2000-3000€",
+          "purchase_frequency": "regular"
+        },
+        "family_relations": [
+          {
+            "relation": "marido",
+            "name": null,
+            "occasions": [
+              "aniversário 50 anos"
+            ],
+            "preferences": []
+          },
+          {
+            "relation": "filho",
+            "name": null,
+            "occasions": [
+              "aniversário 18 anos Julho"
+            ],
+            "preferences": [
+              "streetwear com classe"
+            ]
+          }
+        ],
+        "memories": [
+          {
+            "category": "profissão",
+            "content": "Advogada, trabalha no Porto perto da loja",
+            "date_mentioned": null
+          }
+        ],
+        "current_visit": {
+          "products_mentioned": [
+            "conjunto seda azul-marinho"
+          ],
+          "purchase_intent": "high",
+          "budget_range": "2000-3000€",
+          "occasion": "almoço aniversário marido"
+        },
+        "follow_up_actions": [
+          "Contactar Mariana Ferreira com opções para filho tamanho 42",
+          "Reservar peças linha jovem para aniversário em Julho"
+        ],
+        "summary": "Cliente Mariana Ferreira, advogada no Porto, tamanho 38/36, prefere tweed e seda. Veio para aniversário do marido (50 anos). Interessa-se também em presente para filho (18 anos, tamanho 42). Orçamento 2000-3000€ pessoal, 800-1000€ filho."
+      }
+    },
+    {
+      "id": "conv_002",
+      "title": "Nova cliente — turista brasileira",
+      "segments": [
+        {
+          "speaker": "Consultor",
+          "text": "Boa tarde! Bem-vinda à Chanel. É a primeira vez?",
+          "timestamp": "15:10:05"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Sim! Vim de São Paulo para fazer compras em Lisboa e Porto.",
+          "timestamp": "15:10:12"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "De férias?",
+          "timestamp": "15:10:20"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Sim, duas semanas. Moro em São Paulo mas adoro Portugal, já vim três vezes.",
+          "timestamp": "15:10:28"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "O que procura hoje?",
+          "timestamp": "15:10:35"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Uma bolsa clássica. Tenho o Boy Bag preto de Paris, quero algo diferente. Classic Flap ou 19 Bag.",
+          "timestamp": "15:10:45"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Preferência de cor?",
+          "timestamp": "15:10:58"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Beige ou camel, em couro de novilho. Tenho quarenta e dois anos e gosto de casual chic.",
+          "timestamp": "15:11:08"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Orçamento?",
+          "timestamp": "15:11:18"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Para a bolsa até seis ou sete mil. Já gastei cinco mil em Lisboa.",
+          "timestamp": "15:11:28"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Temos o Classic Flap camel. Interesse em perfumes?",
+          "timestamp": "15:11:38"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Sim! Tenho o Nº5 e o Coco Mademoiselle. O Les Exclusifs interessa-me.",
+          "timestamp": "15:11:50"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Registo o seu nome para próximas visitas?",
+          "timestamp": "15:12:02"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Claro! Beatriz Santos. Quando vier a Portugal venho sempre aqui.",
+          "timestamp": "15:12:15"
+        }
+      ],
+      "ground_truth": {
+        "client_profile": {
+          "gender": "feminino",
+          "age_range": "40-45",
+          "residence": "São Paulo",
+          "client_tier": "alto valor",
+          "style_preferences": [
+            "casual chic",
+            "feminino"
+          ],
+          "fabric_preferences": [
+            "couro de novilho"
+          ],
+          "sizes": {
+            "clothing": null,
+            "shoes": null,
+            "other": null
+          }
+        },
+        "purchase_history": {
+          "products_owned": [
+            "Boy Bag preto",
+            "Chanel Nº5",
+            "Coco Mademoiselle"
+          ],
+          "estimated_spend": "5000€ em Lisboa",
+          "purchase_frequency": "visitas anuais a Portugal"
+        },
+        "family_relations": [],
+        "memories": [
+          {
+            "category": "viagem",
+            "content": "Vem a Portugal 3 vezes, tem família em Lisboa",
+            "date_mentioned": null
+          }
+        ],
+        "current_visit": {
+          "products_mentioned": [
+            "Classic Flap camel",
+            "19 Bag",
+            "Les Exclusifs"
+          ],
+          "purchase_intent": "high",
+          "budget_range": "6000-7000€",
+          "occasion": "viagem de compras"
+        },
+        "follow_up_actions": [
+          "Registar Beatriz Santos para próximas visitas",
+          "Enviar novidades quando vier a Portugal"
+        ],
+        "summary": "Nova cliente Beatriz Santos, brasileira de São Paulo. Tem Boy Bag preto. Procura Classic Flap ou 19 Bag beige/camel couro de novilho. Orçamento 6000-7000€. Interesse em Les Exclusifs."
+      }
+    },
+    {
+      "id": "conv_003",
+      "title": "Cliente jovem masculino — oferta para mãe",
+      "segments": [
+        {
+          "speaker": "Consultor",
+          "text": "Bom dia! Em que posso ajudar?",
+          "timestamp": "11:30:00"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Olá! Sou o Miguel, tenho vinte e oito anos. Queria um presente para a minha mãe, é o aniversário daqui a duas semanas.",
+          "timestamp": "11:30:08"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Sabe o que ela gosta?",
+          "timestamp": "11:30:15"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Adora a Chanel, tem um foulard e uns brincos que usa muito. Tem uns sessenta anos, é muito elegante.",
+          "timestamp": "11:30:25"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Que estilo ela prefere?",
+          "timestamp": "11:30:35"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Muito clássico. Usa preto e bege, adora flores e pérolas. É advogada, veste sempre formal.",
+          "timestamp": "11:30:45"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Orçamento?",
+          "timestamp": "11:30:55"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "À volta de quinhentos euros. Somos três irmãos a oferecer juntos.",
+          "timestamp": "11:31:05"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Temos broches de camélia, foulards de seda e brincos de pérola.",
+          "timestamp": "11:31:15"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "O broche de camélia é lindo! Podemos ver? É a primeira vez que venho à Chanel.",
+          "timestamp": "11:31:25"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Claro! Posso embalar para oferta. O seu apelido?",
+          "timestamp": "11:31:35"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Rodrigues. Miguel Rodrigues.",
+          "timestamp": "11:31:45"
+        }
+      ],
+      "ground_truth": {
+        "client_profile": {
+          "gender": "masculino",
+          "age_range": "25-30",
+          "residence": null,
+          "client_tier": "novo cliente",
+          "style_preferences": [],
+          "fabric_preferences": [],
+          "sizes": {
+            "clothing": null,
+            "shoes": null,
+            "other": null
+          }
+        },
+        "purchase_history": {
+          "products_owned": [],
+          "estimated_spend": null,
+          "purchase_frequency": "primeira visita"
+        },
+        "family_relations": [
+          {
+            "relation": "mãe",
+            "name": null,
+            "occasions": [
+              "aniversário daqui a 2 semanas"
+            ],
+            "preferences": [
+              "clássico",
+              "preto e bege",
+              "flores",
+              "pérolas"
+            ]
+          }
+        ],
+        "memories": [
+          {
+            "category": "família",
+            "content": "Mãe tem ~60 anos, advogada, possui foulard e brincos Chanel",
+            "date_mentioned": null
+          },
+          {
+            "category": "contexto",
+            "content": "Compra partilhada com 2 irmãos",
+            "date_mentioned": null
+          }
+        ],
+        "current_visit": {
+          "products_mentioned": [
+            "broche camélia",
+            "foulard de seda",
+            "brincos de pérola"
+          ],
+          "purchase_intent": "high",
+          "budget_range": "500€",
+          "occasion": "aniversário da mãe"
+        },
+        "follow_up_actions": [
+          "Preparar embalagem para oferta",
+          "Registar Miguel Rodrigues como novo cliente"
+        ],
+        "summary": "Primeira visita de Miguel Rodrigues (28 anos) para presente de aniversário para mãe (~60 anos, advogada, estilo clássico). Compra com 2 irmãos, orçamento 500€. Interesse em broche de camélia."
+      }
+    },
+    {
+      "id": "conv_004",
+      "title": "Cliente regular masculino — upgrade de guarda-roupa",
+      "segments": [
+        {
+          "speaker": "Consultor",
+          "text": "Boa tarde, Dr. Ricardo!",
+          "timestamp": "16:45:00"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Boa tarde! Preciso de renovar o guarda-roupa. Tenho eventos no próximo mês.",
+          "timestamp": "16:45:10"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Que eventos?",
+          "timestamp": "16:45:18"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Um jantar de gala, uma conferência em Genebra e uma inauguração de galeria.",
+          "timestamp": "16:45:28"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Já tem fatos Chanel?",
+          "timestamp": "16:45:40"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Tenho dois de há três anos, o preto de lã e o cinzento. Queria algo mais actual.",
+          "timestamp": "16:45:52"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "O seu tamanho?",
+          "timestamp": "16:46:05"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "50 em fatos, 43 em sapatos.",
+          "timestamp": "16:46:15"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Preferências de estilo?",
+          "timestamp": "16:46:28"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Clássico com detalhe diferente. Prefiro lã e cashmere. Moro em Cascais, o ambiente é conservador mas aprecia qualidade.",
+          "timestamp": "16:46:42"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Temos blazer cashmere azul-noite para a galeria e fato lã para Genebra.",
+          "timestamp": "16:46:58"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Perfeito. Orçamento não é problema, posso ir até quatro ou cinco mil por peça.",
+          "timestamp": "16:47:15"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Posso entrar em contacto na semana que vem para sessão de prova?",
+          "timestamp": "16:47:30"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Sim. Prefiro manhãs, terça ou quarta.",
+          "timestamp": "16:47:45"
+        }
+      ],
+      "ground_truth": {
+        "client_profile": {
+          "gender": "masculino",
+          "age_range": "45-55",
+          "residence": "Cascais",
+          "client_tier": "VIP",
+          "style_preferences": [
+            "clássico contemporâneo",
+            "discreto"
+          ],
+          "fabric_preferences": [
+            "lã",
+            "cashmere"
+          ],
+          "sizes": {
+            "clothing": "50",
+            "shoes": "43",
+            "other": null
+          }
+        },
+        "purchase_history": {
+          "products_owned": [
+            "fato preto de lã",
+            "fato cinzento"
+          ],
+          "estimated_spend": "4000-5000€ por peça",
+          "purchase_frequency": "algumas vezes por ano"
+        },
+        "family_relations": [],
+        "memories": [
+          {
+            "category": "compra anterior",
+            "content": "2 fatos há 3 anos, preto e cinzento",
+            "date_mentioned": null
+          },
+          {
+            "category": "agenda",
+            "content": "Jantar gala, conferência Genebra, inauguração galeria",
+            "date_mentioned": null
+          }
+        ],
+        "current_visit": {
+          "products_mentioned": [
+            "blazer cashmere azul-noite",
+            "fato lã cinzento",
+            "gravatas",
+            "lenços de bolso"
+          ],
+          "purchase_intent": "high",
+          "budget_range": "4000-5000€",
+          "occasion": "múltiplos eventos formais"
+        },
+        "follow_up_actions": [
+          "Agendar sessão de prova terça ou quarta de manhã",
+          "Preparar selecção blazer + fato + acessórios"
+        ],
+        "summary": "Dr. Ricardo, residente em Cascais, tamanho 50/43, prefere lã e cashmere. 3 eventos no próximo mês. Orçamento 4000-5000€ por peça. Sessão de prova terça/quarta de manhã."
+      }
+    },
+    {
+      "id": "conv_005",
+      "title": "Cliente feminina — primeiro grande investimento",
+      "segments": [
+        {
+          "speaker": "Consultor",
+          "text": "Boa tarde! Posso ajudá-la?",
+          "timestamp": "14:20:00"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Boa tarde. É a primeira vez que venho à Chanel. Queria ver as bolsas.",
+          "timestamp": "14:20:10"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "O que a trouxe hoje?",
+          "timestamp": "14:20:20"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Tenho poupado há dois anos para comprar uma bolsa Chanel. A minha avó tinha uma e eu adorava.",
+          "timestamp": "14:20:32"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Que história bonita! O que procura?",
+          "timestamp": "14:20:42"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Algo atemporal que passe para a minha filha. Ela tem seis anos. Gosto do Classic Flap.",
+          "timestamp": "14:20:55"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "Uso diário ou especial?",
+          "timestamp": "14:21:10"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Especial. Sou professora, não uso bolsas caras no trabalho. Mas saio muito ao fim de semana.",
+          "timestamp": "14:21:22"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "O tamanho médio seria perfeito. Cor?",
+          "timestamp": "14:21:35"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Preto. Tenho trinta e cinco anos e quero algo que nunca saia de moda.",
+          "timestamp": "14:21:45"
+        },
+        {
+          "speaker": "Consultor",
+          "text": "O Classic Flap preto em pele de cordeiro custa seis mil e quatrocentos euros.",
+          "timestamp": "14:22:00"
+        },
+        {
+          "speaker": "Cliente",
+          "text": "Tenho exactamente esse valor poupado. Moro em Braga e vim especialmente ao Porto para isto. Chamo-me Ana Sousa.",
+          "timestamp": "14:22:15"
+        }
+      ],
+      "ground_truth": {
+        "client_profile": {
+          "gender": "feminino",
+          "age_range": "30-40",
+          "residence": "Braga",
+          "client_tier": "novo cliente",
+          "style_preferences": [
+            "atemporal",
+            "clássico"
+          ],
+          "fabric_preferences": [
+            "pele de cordeiro"
+          ],
+          "sizes": {
+            "clothing": null,
+            "shoes": null,
+            "other": null
+          }
+        },
+        "purchase_history": {
+          "products_owned": [],
+          "estimated_spend": "6400€",
+          "purchase_frequency": "primeira compra"
+        },
+        "family_relations": [
+          {
+            "relation": "filha",
+            "name": null,
+            "occasions": [
+              "herança futura"
+            ],
+            "preferences": []
+          },
+          {
+            "relation": "avó",
+            "name": null,
+            "occasions": [],
+            "preferences": [
+              "tinha bolsa Chanel"
+            ]
+          }
+        ],
+        "memories": [
+          {
+            "category": "motivação",
+            "content": "Sonho de 2 anos, inspirado pela avó que tinha bolsa Chanel",
+            "date_mentioned": null
+          },
+          {
+            "category": "profissão",
+            "content": "Professora, veio de Braga ao Porto para esta compra",
+            "date_mentioned": null
+          }
+        ],
+        "current_visit": {
+          "products_mentioned": [
+            "Classic Flap médio preto pele de cordeiro"
+          ],
+          "purchase_intent": "high",
+          "budget_range": "6400€",
+          "occasion": "primeiro grande investimento pessoal"
+        },
+        "follow_up_actions": [
+          "Registar Ana Sousa — forte ligação emocional à marca",
+          "Enviar informação sobre cuidado de pele de cordeiro"
+        ],
+        "summary": "Nova cliente Ana Sousa (35 anos, professora, Braga). Primeira compra Chanel, poupou 2 anos. Quer Classic Flap médio preto pele de cordeiro (6400€). Quer passar à filha (6 anos)."
+      }
+    }
+  ]
+}
