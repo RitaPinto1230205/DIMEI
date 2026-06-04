@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pyannote.core import Annotation, Segment
 from pyannote.metrics.diarization import DiarizationErrorRate
 from pydantic import BaseModel
-import os
-import json
+from dotenv import load_dotenv
+import os, json
 from groq import Groq
 
 app = FastAPI(title="VoiceCRM API", version="4.0")
@@ -15,9 +15,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-from dotenv import load_dotenv
+
 load_dotenv()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+def clean_crm_json(data: dict) -> dict:
+    """Garante que strings vazias e 'desconhecido' viram null e arrays estão corretos."""
+    
+    UNKNOWN_VALUES = {"desconhecido", "unknown", "n/a", "não disponível", "não mencionado", ""}
+    
+    def clean_value(v):
+        if isinstance(v, str):
+            stripped = v.strip()
+            return None if stripped.lower() in UNKNOWN_VALUES else stripped
+        if isinstance(v, list):
+            return [clean_value(i) for i in v if i not in ("", None, [])] or None
+        if isinstance(v, dict):
+            return clean_crm_json(v)
+        return v
+    
+    return {k: clean_value(v) for k, v in data.items()}
 
 @app.get("/health")
 def health():
@@ -52,47 +69,29 @@ CONVERSA:
 Responde APENAS com um JSON válido com esta estrutura:
 {{
     "client_profile": {{
-        "gender": "",
-        "age_range": "",
-        "residence": "",
-        "client_tier": "",
+        "gender": null,
+        "age_range": null,
+        "residence": null,
+        "client_tier": null,
         "style_preferences": [],
         "fabric_preferences": [],
-        "sizes": {{
-            "clothing": "",
-            "shoes": "",
-            "other": ""
-        }}
+        "sizes": {{"clothing": null, "shoes": null, "other": null}}
     }},
     "purchase_history": {{
         "products_owned": [],
-        "estimated_spend": "",
-        "purchase_frequency": ""
+        "estimated_spend": null,
+        "purchase_frequency": null
     }},
-    "family_relations": [
-        {{
-            "relation": "",
-            "name": "",
-            "occasions": [],
-            "preferences": []
-        }}
-    ],
-    "memories": [
-        {{
-            "category": "",
-            "content": "",
-            "date_mentioned": ""
-        }}
-    ],
+    "family_relations": [],
+    "memories": [],
     "current_visit": {{
         "products_mentioned": [],
         "purchase_intent": "high/medium/low",
-        "budget_range": "",
-        "occasion": ""
+        "budget_range": null,
+        "occasion": null
     }},
-
     "follow_up_actions": [],
-    "summary": ""
+    "summary": null
 }}"""
     
 # prompt que envia ao LLM
@@ -111,11 +110,11 @@ Responde APENAS com um JSON válido com esta estrutura:
             if content.startswith("json"):
                 content = content[4:]
         result = json.loads(content.strip())
+        result = clean_crm_json(result)
     except json.JSONDecodeError:
         result = {"raw": response.choices[0].message.content}
 
     return result
-
 
 # ── DER endpoint ──────────────────────────────────────────────────────────────
 
