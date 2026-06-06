@@ -1,0 +1,147 @@
+{
+  "eval_info": {
+    "dataset": "VoiceCRM Golden Evaluation Dataset",
+    "dataset_version": "2.0",
+    "num_conversations": 5,
+    "parametros_avaliados": [
+      "gender",
+      "lingua",
+      "residence",
+      "size",
+      "intent",
+      "actions",
+      "summary",
+      "fam_schema",
+      "privacidade",
+      "json_quality"
+    ],
+    "modelos_testados": [
+      "llama-3.1-8b-instant",
+      "meta-llama/llama-4-scout-17b-16e-instruct",
+      "allam-2-7b",
+      "groq/compound-mini"
+    ],
+    "data_eval": "2026-06-05 01:12"
+  },
+  "ranking": [
+    {
+      "posicao": 1,
+      "modelo": "llama-3.1-8b-instant",
+      "score_pct": 90
+    },
+    {
+      "posicao": 2,
+      "modelo": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "score_pct": 84
+    },
+    {
+      "posicao": 3,
+      "modelo": "allam-2-7b",
+      "score_pct": 70
+    },
+    {
+      "posicao": 4,
+      "modelo": "groq/compound-mini",
+      "score_pct": 0
+    }
+  ],
+  "detalhes": {
+    "llama-3.1-8b-instant": {
+      "score": 90,
+      "score_raw": "45/50",
+      "conversas_ok": 5,
+      "conversas_erro": 0,
+      "latencia_media": 11.89,
+      "tokens_in_total": 3210,
+      "tokens_out_total": 1540,
+      "tokens_total": 4750,
+      "open_source": true,
+      "params": "8B",
+      "cat_erros": {
+        "gender": 0,
+        "lingua": 0,
+        "residence": 0,
+        "size": 0,
+        "intent": 0,
+        "actions": 0,
+        "summary": 2,
+        "fam_schema": 0,
+        "privacidade": 3,
+        "json_quality": 0
+      }
+    },
+    "meta-llama/llama-4-scout-17b-16e-instruct": {
+      "score": 84,
+      "score_raw": "42/50",
+      "conversas_ok": 5,
+      "conversas_erro": 0,
+      "latencia_media": 0.88,
+      "tokens_in_total": 2913,
+      "tokens_out_total": 1388,
+      "tokens_total": 4301,
+      "open_source": true,
+      "params": "17B",
+      "cat_erros": {
+        "gender": 1,
+        "lingua": 0,
+        "residence": 0,
+        "size": 0,
+        "intent": 0,
+        "actions": 0,
+        "summary": 4,
+        "fam_schema": 0,
+        "privacidade": 3,
+        "json_quality": 0
+      }
+    },
+    "allam-2-7b": {
+      "score": 70,
+      "score_raw": "14/20",
+      "conversas_ok": 2,
+      "conversas_erro": 3,
+      "latencia_media": 11.51,
+      "tokens_in_total": 1819,
+      "tokens_out_total": 749,
+      "tokens_total": 2568,
+      "open_source": false,
+      "params": "7B",
+      "cat_erros": {
+        "gender": 0,
+        "lingua": 0,
+        "residence": 1,
+        "size": 1,
+        "intent": 1,
+        "actions": 0,
+        "summary": 2,
+        "fam_schema": 1,
+        "privacidade": 0,
+        "json_quality": 0
+      }
+    },
+    "groq/compound-mini": {
+      "score": 0,
+      "score_raw": "0/0",
+      "conversas_ok": 0,
+      "conversas_erro": 5,
+      "latencia_media": 1.47,
+      "tokens_in_total": 0,
+      "tokens_out_total": 0,
+      "tokens_total": 0,
+      "open_source": false,
+      "params": "?",
+      "cat_erros": {
+        "gender": 0,
+        "lingua": 0,
+        "residence": 0,
+        "size": 0,
+        "intent": 0,
+        "actions": 0,
+        "summary": 0,
+        "fam_schema": 0,
+        "privacidade": 0,
+        "json_quality": 0
+      }
+    }
+  },
+  "recomendacao": "llama-3.1-8b-instant"
+}
