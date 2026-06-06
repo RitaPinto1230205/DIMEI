@@ -15,6 +15,7 @@ Métricas avaliadas:
   - Score Global: média ponderada de todas as métricas
 """
 
+
 import json
 import os
 import time
