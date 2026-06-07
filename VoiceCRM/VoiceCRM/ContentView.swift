@@ -91,13 +91,15 @@ struct ContentView: View {
     @State private var silenceTimer: Timer?
     @State private var lastTextChange = Date()
     @State private var diarizationTimer: Timer?
-
-    private let silenceThreshold: TimeInterval = 1
-    private let backendURL = "http://192.168.1.95:5003"
-
     @State private var recordingSampleRate: Double = 16000
     @State private var currentSegmentSamples: [Float] = []
     @State private var allAudioSamples: [Float] = []
+    @State private var showQualityAlert = false
+    @State private var qualityAlertMessage = ""
+    
+    private let silenceThreshold: TimeInterval = 1
+    //private let backendURL = "http://192.168.1.95:5003" //Porto
+    private let backendURL = "http://192.168.1.87:5003" //Casa
 
     var body: some View {
         NavigationView {
@@ -184,6 +186,26 @@ struct ContentView: View {
             }
         }
         .onAppear { requestPermissions() }
+        .alert("Aviso de Qualidade", isPresented: $showQualityAlert) {
+            Button("Continuar mesmo assim") {
+                let conversationSamples16k = resampleTo16k(
+                    samples: allAudioSamples, fromRate: recordingSampleRate)
+                Task {
+                    await diarizeAndUpdateSegments(
+                        conversationSamples16k: conversationSamples16k)
+                    await extractCRMData()
+                }
+            }
+            Button("Descartar gravação", role: .destructive) {
+                segments = []
+                segmentCount = 0
+                allAudioSamples = []
+                currentSegmentSamples = []
+                statusMessage = "Gravação descartada"
+            }
+        } message: {
+            Text(qualityAlertMessage)
+        }
     }
 
     private var enrollmentHeader: some View {
@@ -416,11 +438,36 @@ struct ContentView: View {
             statusMessage = "Gravação terminada — falta enrolamento do consultor"; return
         }
 
+        // ── RF13: verificar qualidade mínima ──
+        if segments.count < 3 {
+            showQualityAlert = true
+            qualityAlertMessage = "⚠️ Qualidade insuficiente\n\nForam detectados apenas \(segments.count) segmento(s) de fala. O registo CRM pode estar incompleto.\n\nRecomenda-se repetir a gravação em condições acústicas mais favoráveis."
+            return
+        }
+
         let conversationSamples16k = resampleTo16k(samples: allAudioSamples, fromRate: recordingSampleRate)
         statusMessage = "A processar diarização..."
 
         Task {
             await diarizeAndUpdateSegments(conversationSamples16k: conversationSamples16k)
+            
+            // ── RF13: verificar DER após diarização ──
+            let consultorSegments = segments.filter { $0.speaker == "Consultor" }.count
+            let clienteSegments = segments.filter { $0.speaker == "Cliente" }.count
+            let totalSegments = segments.count
+            let unidentified = segments.filter { $0.speaker == "A identificar..." }.count
+            
+            if totalSegments > 0 {
+                let unidentifiedRate = Double(unidentified) / Double(totalSegments)
+                if unidentifiedRate > 0.5 || (consultorSegments == 0 || clienteSegments == 0) {
+                    await MainActor.run {
+                        showQualityAlert = true
+                        qualityAlertMessage = "⚠️ Qualidade de diarização insuficiente\n\nO sistema não conseguiu identificar correctamente os locutores (\(unidentified) de \(totalSegments) segmentos por identificar).\n\nO registo CRM pode ter locutores incorrectos. Considere repetir com vozes mais distintas."
+                    }
+                    return
+                }
+            }
+            
             await extractCRMData()
         }
     }
