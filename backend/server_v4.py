@@ -28,9 +28,13 @@ def clean_crm_json(data: dict) -> dict:
         if isinstance(v, str):
             stripped = v.strip()
             return None if stripped.lower() in UNKNOWN_VALUES else stripped
+        if isinstance(v, int) or isinstance(v, float):
+            return str(int(v)) 
         if isinstance(v, list):
             return [clean_value(i) for i in v if i not in ("", None, [])] or None
         if isinstance(v, dict):
+            if all(isinstance(val, (int, float)) for val in v.values()):
+                return ", ".join(f"{k}: {val}€" for k, val in v.items())
             return clean_crm_json(v)
         return v
     
@@ -91,12 +95,24 @@ Responde APENAS com um JSON válido com esta estrutura:
         "occasion": null
     }},
     "follow_up_actions": [],
-    "summary": null
-}}"""
+    "summary": "resumo obrigatório em português europeu, 50-100 palavras"
+}}
     
+ REGRAS:
+- gender: "masculino" ou "feminino" em português europeu, nunca "male" ou "female"
+- usa null para campos sem informação, nunca strings vazias ou "desconhecido"
+- tamanhos sempre em números ("38", "43"), nunca por extenso
+- follow_up_actions: lista de strings simples e accionáveis
+- family_relations: lista de objectos com campos: relation, name, occasions, preferences
+- purchase_intent: apenas "high", "medium" ou "low" em inglês
+- budget_range: sempre uma string simples como "300-2000€" ou "até 500€", nunca um objecto JSON
+- sizes.other: sempre uma string simples como "cinto: 92" ou null, nunca um objecto JSON
+- O campo summary é OBRIGATÓRIO — escreve sempre um resumo em português europeu entre 50 e 100 palavras, mencionando o perfil do cliente, os produtos discutidos e as acções de seguimento
+- Responde APENAS com JSON, sem markdown, sem texto adicional"""
+
 # prompt que envia ao LLM
     response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.1,
         max_tokens=2000
