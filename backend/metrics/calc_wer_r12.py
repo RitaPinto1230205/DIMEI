@@ -1,0 +1,26 @@
+"""
+VoiceCRM — Cálculo WER sessão R12
+Execução: uv run python3 calc_wer_r12.py
+"""
+
+def wer(ref, hyp):
+    r = ref.lower().split()
+    h = hyp.lower().split()
+    if not r: return 0.0
+    d = [[0]*(len(h)+1) for _ in range(len(r)+1)]
+    for i in range(len(r)+1): d[i][0] = i
+    for j in range(len(h)+1): d[0][j] = j
+    for i in range(1,len(r)+1):
+        for j in range(1,len(h)+1):
+            if r[i-1]==h[j-1]: d[i][j]=d[i-1][j-1]
+            else: d[i][j]=1+min(d[i-1][j],d[i][j-1],d[i-1][j-1])
+    return round(d[len(r)][len(h)]/len(r)*100,1)
+
+ref = "boa tarde bem vinda é um prazer recebê-la em que posso ajudá-la boa tarde venho porque a minha empresa vai enviar-me para representar portugal numa conferência em tóquio em outubro é a primeira vez que vou ao japão e quero estar vestida de forma culturalmente adequada mas sem abdicar do meu estilo europeu que experiência incrível para uma conferência no japão a elegância discreta é muito apreciada prefere um look mais estruturado e formal ou algo com um toque mais contemporâneo estruturado e elegante trabalho numa empresa de tecnologia como directora de produto tenho trinta e seis anos uso tamanho trinta e seis em roupa e calço o trinta e oito prefiro cores sóbrias preto cinzento ou azul marinho perfeito para tóquio em outubro que pode ser fresco recomendo um conjunto com blazer estruturado e calças de corte clássico em azul marinho ficaria absolutamente perfeito e é muito respeitado no ambiente profissional japonês azul marinho é a minha cor preferida tenho alergia a lã por isso preciso de tecidos alternativos algodão seda ou misturas sintéticas de alta qualidade temos blazers em algodão egípcio com toque de elastano que são absolutamente magníficos com o caimento de um blazer de lã mas sem os problemas de alergia este modelo azul marinho acabou de chegar é exatamente o que procuro e para calçado recomenda saltos ou sapatilhas elegantes vou andar muito durante a conferência para uma conferência onde anda muito recomendo um salto baixo ou um sapato de bico fino com sola confortável temos modelos muito elegantes a partir de duzentos euros quanto fica o conjunto completo blazer calças e sapatos o meu orçamento é de dois mil e quinhentos euros para toda a viagem o blazer está a oitocentos as calças a quinhentos e os sapatos a duzentos e cinquenta o conjunto completo ficaria a mil e quinhentos e cinquenta euros deixando margem para outros itens da viagem perfeito fico com os três moro em lisboa no príncipe real o meu nome é beatriz sousa o email é beatriz ponto sousa arroba tech ponto pt prefiro contacto por email muito obrigada beatriz ficou registada vou anotar a conferência em tóquio em outubro quando chegarem as peças de outono entramos em contacto boa viagem"
+
+hyp = "boa tarde bem vinda é um prazer recebê-la em que posso ajudá-la boa tarde venho porque a minha empresa vai enviar-me para representar portugal numa conferência em tóquio em outubro é a primeira vez que vou ao japão e quero estar vestida de forma culturalmente adequada mas sem abdicar do meu estilo europeu que experiência incrível para uma conferência no japão a elegância discreta é muito apreciada prefere um look mais estruturado e formal ou algo com um toque mais contemporâneo estruturado e elegante trabalho numa empresa de tecnologia como directora de produto tenho trinta e seis anos uso tamanho trinta e seis em roupa e calço o trinta e oito prefiro cores sóbrias preto cinzento ou azul marinho perfeito para tóquio em outubro que pode ser fresco recomendo um conjunto com blazer estruturado e calças de corte clássico em azul marinho ficaria absolutamente perfeito e é muito respeitado no ambiente profissional japonês azul marinho é a minha cor preferida preciso de tecidos alternativos algodão seda ou misturas sintéticas de alta qualidade temos blazers em algodão egípcio com toque de elastano que são absolutamente magníficos e um blazer de lã mas sem os problemas de alergia este modelo azul marinho acabou de chegar é exatamente o que procuro para calçado saltos ou sapatilhas elegantes vou andar muito durante a conferência para uma conferência onde anda muito recomendo um salto baixo ou um sapato de bico fino com sola confortável temos modelos muito elegantes a partir de duzentos euros quanto fica o conjunto completo calças e sapatos o meu orçamento é de dois mil e quinhentos euros para toda a viagem o blazer está a oitocentos as calças a quinhentos e os sapatos a duzentos e cinquenta o conjunto completo ficaria a mil e quinhentos e cinquenta euros deixando margem para outros itens da viagem perfeito fico com os três moro em lisboa no príncipe real o meu nome é beatriz sousa email é beatriz sousa arroba tech pt prefiro contacto por email muito obrigada beatriz ficou registada vou anotar a conferência em tóquio em outubro quando chegarem as peças de outono entramos em contacto boa viagem"
+
+resultado = wer(ref, hyp)
+print(f"WER R12: {resultado}%")
+print(f"Palavras referência: {len(ref.split())}")
+print(f"Palavras hipótese: {len(hyp.split())}")

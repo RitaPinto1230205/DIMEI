@@ -1,0 +1,33 @@
+"""
+VoiceCRM — Cálculo WER sessão R03
+Execução: uv run python3 calc_wer_r03.py
+
+ritapinto@NULL backend % uv run python3 calc_wer_r03.py
+WER R03: 6.8%
+Palavras referência: 529
+Palavras hipótese: 495
+
+"""
+
+def wer(ref, hyp):
+    r = ref.lower().split()
+    h = hyp.lower().split()
+    if not r: return 0.0
+    d = [[0]*(len(h)+1) for _ in range(len(r)+1)]
+    for i in range(len(r)+1): d[i][0] = i
+    for j in range(len(h)+1): d[0][j] = j
+    for i in range(1,len(r)+1):
+        for j in range(1,len(h)+1):
+            if r[i-1]==h[j-1]: d[i][j]=d[i-1][j-1]
+            else: d[i][j]=1+min(d[i-1][j],d[i][j-1],d[i-1][j-1])
+    return round(d[len(r)][len(h)]/len(r)*100,1)
+
+ref = "boa tarde bem vindo é a primeira vez que nos visita ou já conhece a loja temos coleções novas que acabaram de chegar e ficaria muito contente de lhe mostrar boa tarde já conheço a marca mas é a primeira vez que venho a esta loja vim especificamente porque preciso de um fato para uma ocasião muito especial vou ser padrinho no casamento do meu irmão em setembro e quero algo verdadeiramente elegante que honra ser padrinho é uma responsabilidade muito especial para um casamento em setembro temos opções excelentes prefere um fato clássico em tons escuros como o azul marinho ou o cinzento ou algo mais arrojado com um corte mais moderno prefiro algo clássico mas com personalidade gosto do azul marinho mas nunca usei um fato desta marca normalmente uso tamanho cinquenta na roupa e calço o quarenta e três trabalho numa empresa financeira em lisboa por isso estou habituado a usar fato no dia a dia perfeito com o seu perfil profissional vai sentir-se muito confortável nas nossas peças temos um fato em lã merino azul marinho com corte italiano que seria ideal para um casamento de verão o tecido é leve e respirável perfeito para setembro quer experimentar sim adorava experimentar tenho também pensado em comprar uma gravata e um lenço de bolso a condizer a noiva pediu para os padrinhos usarem detalhes em cor de vinho consegue sugerir alguma combinação claro que sim com o azul marinho os detalhes em vinho ficam absolutamente magníficos temos gravatas em seda e lenços de bolso nessa combinação de cores é uma escolha muito sofisticada enquanto preparo a cabine de prova diga-me tem camisas adequadas para usar com o fato tenho algumas camisas brancas de boa qualidade a minha esposa disse que devia aproveitar para renovar também as camisas ela tem muito bom gosto e concordo com ela qual é o orçamento que normalmente as pessoas gastam num conjunto completo para um conjunto completo com fato gravata lenço e camisa estamos a falar de um investimento entre mil e duzentos e dois mil euros dependendo das opções que escolher o fato em si ronda os novecentos euros as camisas entre cento e cinquenta e duzentos cada uma e os acessórios entre oitenta e cento e cinquenta é um investimento considerável mas é para uma ocasião muito especial o meu irmão e eu somos muito próximos crescemos juntos no porto embora eu agora viva em lisboa quero estar impecável no dia dele vamos em frente com a prova do fato com todo o prazer vejo que valoriza muito este momento especial a cabine está pronta vou buscar o fato no tamanho cinquenta e também uma camisa branca para completar o visual durante a prova pode deixar os seus dados para eu registar claro chamo-me ricardo mendes moro em lisboa no príncipe real o meu telemóvel é nove um cinco seis sete oito nove zero um prefiro ser contactado por mensagem se possível perfeito ricardo ficou registado vou também anotar que tem casamento em setembro e que os detalhes devem ser em cor de vinho assim quando chegarem novidades que combinem entramos em contacto siga-me por favor até à cabine"
+
+hyp = "boa tarde bem vindo ou já conhece a loja temos coleções novas que acabaram de chegar e ficaria muito contente de lhe mostrar boa tarde já conheço a marca mas é a primeira vez que venho a esta loja vim especificamente porque preciso de um fato para uma ocasião muito especial vou ser padrinho no casamento do meu irmão em setembro e quero algo verdadeiramente elegante que honra ser padrinho é uma responsabilidade muito especial para um casamento em setembro temos opções excelentes prefere um fato clássico em tons escuros como o azul marinho ou o cinzento ou algo mais arrojado com um corte mais moderno prefiro algo clássico mas com personalidade gosto do azul marinho mas nunca usei um fato desta marca normalmente uso tamanho cinquenta na roupa e calço o quarenta e três u habituado a usar fato no dia a dia perfeito com o seu perfil profissional vai sentir-se muito confortável nas nossas peças trino azul marinho com corte italiano que seria ideal para um casamento de verão o tecido é leve e respirável perfeito para setembro quer experimentar sim adorava experimentar tenho também pensado em comprar uma gravata e um lenço de bolso a condizer a noiva pediu para os padrinhos usarem detalhes em cor de vinho alguma combinação claro que sim com o azul marinho os detalhes em vinho ficam absolutamente magníficos temos gravatas em seda e lenços de bolso nessa combinação de cores enquanto preparo a cabine de prova diga-me tem camisas adequadas para usar com o fato tenho algumas camisas brancas de boa qualidade disse que devia aproveitar para renovar também as camisas ela tem muito bom gosto e concordo com ela qual é o orçamento que normalmente as pessoas gastam num conjunto completo para um conjunto completo com fato gravata lenço e camisa estamos a falar de um investimento entre mil e duzentos e dois mil euros dependendo das opções que escolher o fato em si ronda os novecentos euros as camisas entre cento e cinquenta e duzentos cada uma e os acessórios entre oitenta e cento e cinquenta é um investimento considerável mas é para uma ocasião muito especial e eu somos muito próximos crescemos juntos no porto embora eu agora viva em lisboa quero estar impecável no dia dele vamos em frente com a prova do fato com todo o prazer vejo que valoriza muito este momento especial a cabine está pronta vou buscar o fato no tamanho cinquenta e também uma camisa branca para completar o visual durante a prova pode deixar os seus dados para eu registar claro chamo-me ricardo mendes em lisboa no príncipe real o meu telemóvel é nove um cinco seis sete oito nove zero um prefiro ser contactado por mensagem se possível perfeito ricardo ficou registado vou também anotar que tem casamento em setembro e que os detalhes devem ser em cor de vinho assim quando chegarem novidades que combinem entramos em contacto siga-me por favor até à cabine"
+
+resultado = wer(ref, hyp)
+print(f"WER R03: {resultado}%")
+print(f"Palavras referência: {len(ref.split())}")
+print(f"Palavras hipótese: {len(hyp.split())}")
+
