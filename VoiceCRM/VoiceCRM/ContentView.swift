@@ -283,6 +283,7 @@ struct ContentView: View {
 
     func extractCRMData() async {
         guard !segments.isEmpty else { return }
+        guard !isRecording else { return }  
 
         await MainActor.run { isProcessingLLM = true }
 
