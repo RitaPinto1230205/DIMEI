@@ -1,0 +1,138 @@
+{
+  "eval_version": "2.0",
+  "dataset": "VoiceCRM Golden Evaluation Dataset",
+  "dataset_version": "3.0",
+  "num_conversations": 15,
+  "metrics_evaluated": [
+    "Exact Match",
+    "Precision",
+    "Recall",
+    "F1-Score",
+    "Hallucination Rate",
+    "Schema Validity",
+    "Null Discipline",
+    "Language Compliance",
+    "Latency",
+    "Token Efficiency",
+    "JSON Parse Rate",
+    "Followup Actionability",
+    "Summary Quality"
+  ],
+  "data": {
+    "llama-3.3-70b-versatile": {
+      "model": "llama-3.3-70b-versatile",
+      "info": {
+        "params": "70B",
+        "open_source": true,
+        "fabricante": "Meta"
+      },
+      "n_conversas_ok": 15,
+      "n_conversas_erro": 0,
+      "json_parse_rate": 100.0,
+      "f1_medio": 54.6,
+      "precision_media": 60.5,
+      "recall_media": 50.0,
+      "hallucination_rate_media": 3.3,
+      "schema_compliance_rate": 93.3,
+      "null_discipline_rate": 100.0,
+      "language_compliance_rate": 100.0,
+      "latencia_media": 1.11,
+      "token_efficiency_media": 281.0,
+      "tokens_media": 1052.1,
+      "followup_actionability_rate": 100.0,
+      "summary_quality_rate": 100.0
+    },
+    "meta-llama/llama-4-scout-17b-16e-instruct": {
+      "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "info": {
+        "params": "17B",
+        "open_source": true,
+        "fabricante": "Meta"
+      },
+      "n_conversas_ok": 15,
+      "n_conversas_erro": 0,
+      "json_parse_rate": 100.0,
+      "f1_medio": 54.5,
+      "precision_media": 61.9,
+      "recall_media": 48.9,
+      "hallucination_rate_media": 3.3,
+      "schema_compliance_rate": 93.3,
+      "null_discipline_rate": 100.0,
+      "language_compliance_rate": 100.0,
+      "latencia_media": 1.02,
+      "token_efficiency_media": 267.1,
+      "tokens_media": 961.3,
+      "followup_actionability_rate": 100.0,
+      "summary_quality_rate": 100.0
+    },
+    "llama-3.1-8b-instant": {
+      "model": "llama-3.1-8b-instant",
+      "info": {
+        "params": "8B",
+        "open_source": true,
+        "fabricante": "Meta"
+      },
+      "n_conversas_ok": 15,
+      "n_conversas_erro": 0,
+      "json_parse_rate": 100.0,
+      "f1_medio": 51.0,
+      "precision_media": 56.2,
+      "recall_media": 46.9,
+      "hallucination_rate_media": 10.0,
+      "schema_compliance_rate": 100.0,
+      "null_discipline_rate": 100.0,
+      "language_compliance_rate": 100.0,
+      "latencia_media": 7.14,
+      "token_efficiency_media": 314.5,
+      "tokens_media": 1057.2,
+      "followup_actionability_rate": 100.0,
+      "summary_quality_rate": 100.0
+    },
+    "allam-2-7b": {
+      "model": "allam-2-7b",
+      "info": {
+        "params": "7B",
+        "open_source": false,
+        "fabricante": "SDAIA"
+      },
+      "n_conversas_ok": 10,
+      "n_conversas_erro": 5,
+      "json_parse_rate": 66.7,
+      "f1_medio": 35.9,
+      "precision_media": 72.5,
+      "recall_media": 25.5,
+      "hallucination_rate_media": 10.0,
+      "schema_compliance_rate": 90.0,
+      "null_discipline_rate": 100.0,
+      "language_compliance_rate": 100.0,
+      "latencia_media": 14.79,
+      "token_efficiency_media": 907.3,
+      "tokens_media": 1473.6,
+      "followup_actionability_rate": 100.0,
+      "summary_quality_rate": 80.0
+    }
+  },
+  "ranking": [
+    {
+      "pos": 1,
+      "model": "llama-3.3-70b-versatile",
+      "f1": 54.6
+    },
+    {
+      "pos": 2,
+      "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "f1": 54.5
+    },
+    {
+      "pos": 3,
+      "model": "llama-3.1-8b-instant",
+      "f1": 51.0
+    },
+    {
+      "pos": 4,
+      "model": "allam-2-7b",
+      "f1": 35.9
+    }
+  ],
+  "timestamp": "2026-06-08 17:34"
+}
