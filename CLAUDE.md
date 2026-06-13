@@ -1,98 +1,237 @@
-# VoiceCRM — Project Context for Claude
+# VoiceCRM
 
-## What this project is
+iOS app de CRM por voz para retalho de luxo — dissertação de mestrado ISEP 2026.
 
-A thesis project (TESE) — an iOS app that records speech, segments it by silence, transcribes it via Apple's SpeechRecognizer, and sends segments to a Python backend for speaker diarization. The goal is a Voice CRM that identifies who said what in a conversation.
+Grava conversas entre consultor e cliente, transcreve em português europeu via SFSpeechRecognizer, faz diarização de locutores via FluidAudio, e extrai dados CRM estruturados via LLM (Llama 4 Scout no Groq).
 
-## Architecture
+---
+
+## Arquitectura
 
 ```
-iPhone (SwiftUI) ──POST /analyse──> Python Flask backend ──> speaker diarization model
+iPhone (SwiftUI)
+    │
+    │  POST /analyse  →  transcrição + segmentos de áudio
+    │  POST /crm      →  extração CRM via LLM
+    │  POST /der      →  cálculo DER (avaliação)
+    ▼
+Python FastAPI (server_v4.py · porta 5003)
+    │
+    ├── FluidAudio  →  diarização de locutores
+    ├── Groq API    →  Llama 4 Scout (extração CRM)
+    └── pyannote    →  cálculo DER
 ```
 
-- **iOS frontend**: `VoiceCRM/VoiceCRM/ContentView.swift` — SwiftUI app, records audio, uses `SFSpeechRecognizer` (pt-PT locale), segments speech on 1.5s silence, sends segments to backend
-- **Backend (active)**: `backend/server_moshi.py` — Flask on port 5002, loads Moshi model (`kyutai/moshiko-pytorch-bf16`) from HuggingFace, uses Apple MPS (M1 GPU)
-- **Backend (old)**: `backend/server.py` — Flask on port 5001, used `pyannote/speaker-diarization-3.1`, now replaced by Moshi
+---
 
-## Backend setup
+## ⚠️ Antes de arrancar — actualizar o IP
 
-Managed with **UV**. Python 3.11, venv at `backend/.venv`.
+O IP do Mac está hardcoded no iOS. **Sempre que mudares de rede, actualiza este valor.**
 
-```bash
-# Install UV (if not installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+**Ficheiro:** `VoiceCRM/VoiceCRM/ContentView.swift` linha ~228
 
-# Create venv and install dependencies
-cd backend
-uv venv --python 3.11
-uv sync
-
-# Run the active server
-uv run python server_moshi.py
-
-# Add a dependency
-uv add <package>
-```
-
-Dependencies are declared in `backend/pyproject.toml`. The old `backend/venv/` folder (pip-managed) can be deleted.
-
-## Running the backend
-
-```bash
-cd backend
-uv run python server_moshi.py
-# Server starts on http://0.0.0.0:5002
-```
-
-Check health: `curl http://localhost:5002/health`
-
-## iOS ↔ Backend connection
-
-The iOS app hardcodes the server IP in `ContentView.swift:228`:
 ```swift
-let serverURL = URL(string: "http://192.168.1.105:5001/analyse")!
+// Muda para o IP actual do teu Mac na rede local
+let serverURL = URL(string: "http://192.168.1.105:5003/analyse")!
 ```
-**Update this IP** to match the Mac's local IP whenever the network changes. Also note the port — `server_moshi.py` runs on **5002**, but the Swift code still points to **5001** (needs updating).
 
-## API
+Para saber o IP actual do Mac:
 
-### POST /analyse
-Receives speech segments from the iPhone, returns them with speaker labels.
+```bash
+ipconfig getifaddr en0
+```
 
-Request:
+---
+
+## Backend — arrancar o servidor
+
+### Requisitos
+- Python 3.11
+- [UV](https://astral.sh/uv) (gestor de dependências)
+- Conta Groq com API key
+
+### 1. Instalar UV (só uma vez)
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 2. Configurar variáveis de ambiente
+
+Cria um ficheiro `.env` na pasta `backend/`:
+
+```bash
+cd backend
+cp .env.example .env   # se existir, ou cria manualmente
+```
+
+Conteúdo do `.env`:
+```
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### 3. Instalar dependências e arrancar
+
+```bash
+cd backend
+uv venv --python 3.11   # só na primeira vez
+uv sync                  # instala dependências do pyproject.toml
+uv run python server_v4.py
+```
+
+O servidor fica disponível em `http://0.0.0.0:5003`.
+
+### Verificar que está a correr
+
+```bash
+curl http://localhost:5003/health
+```
+
+Resposta esperada:
 ```json
+{ "status": "ok", "device": "mps", "model": "llama-4-scout-17b" }
+```
+
+### Notas técnicas
+- O backend usa `torch.device("mps")` — **só funciona em Mac M1/M2**. Em Intel Mac, muda para `"cpu"` em `server_v4.py`.
+- O modelo FluidAudio é descarregado do HuggingFace na primeira execução (~alguns GB). Fica em cache em `~/.cache/huggingface/`.
+
+---
+
+## iOS — arrancar a app
+
+1. Abre `VoiceCRM/VoiceCRM.xcodeproj` no Xcode
+2. **Actualiza o IP** conforme descrito acima
+3. Liga um iPhone físico (o simulador não suporta microfone)
+4. Build & Run (`⌘R`)
+
+Permissões necessárias (já configuradas no `Info.plist`):
+- Microfone
+- Reconhecimento de voz
+
+O reconhecedor está configurado para `pt-PT` (português europeu).
+
+---
+
+## API — endpoints principais
+
+### `POST /analyse`
+Recebe segmentos de áudio transcritos, devolve com identificação de locutores.
+
+```json
+// Request
 {
   "segments": [
-    { "index": 1, "text": "Olá, como estás?", "timestamp": "14:32:01" }
+    { "index": 1, "text": "Bom dia, em que posso ajudá-lo?", "timestamp": "10:32:01" }
   ]
 }
-```
 
-Response:
-```json
+// Response
 {
   "status": "ok",
-  "model": "moshi",
-  "device": "mps",
   "segments": [
-    { "index": 1, "text": "...", "timestamp": "...", "speaker": "Locutor A" }
+    { "index": 1, "text": "Bom dia, em que posso ajudá-lo?", "timestamp": "10:32:01", "speaker": "Consultor" }
   ]
 }
 ```
 
-### GET /health
-Returns server status and device (mps/cpu).
+### `POST /crm`
+Extrai dados CRM estruturados da conversa via LLM.
 
-## Key technical notes
+```json
+// Request
+{
+  "transcript": "Consultor: Bom dia...\nCliente: Preciso de..."
+}
 
-- **MPS device**: Backend uses `torch.device("mps")` — M1/M2 Mac only. On Intel Macs, change to `"cpu"`.
-- **Model loading**: Moshi model is downloaded from HuggingFace on first run (~several GB). Cached in `~/.cache/huggingface/`.
-- **Speaker diarization**: Currently a stub (alternates A/B by index). Real Moshi diarization is not yet wired up.
-- **Speech language**: iOS recognizer is set to `pt-PT` (European Portuguese).
-- **Silence threshold**: 1.5 seconds of silence triggers a new segment (`silenceThreshold` in ContentView).
+// Response
+{
+  "client_profile": { "gender": "feminino", "residence": "Lisboa", ... },
+  "current_visit": { "occasion": "gala", "budget_range": "€2000", ... },
+  "follow_up_actions": [ "enviar propostas por email" ]
+}
+```
 
-## iOS project
+### `POST /der`
+Calcula Diarization Error Rate (usado na avaliação da dissertação).
 
-Xcode project at `VoiceCRM/VoiceCRM.xcodeproj`. Open with Xcode, build and run on a real iPhone (microphone required — simulator won't work for audio).
+### `GET /health`
+Devolve estado do servidor, device (mps/cpu) e modelo activo.
 
-Required permissions (already in Info.plist): microphone, speech recognition.
+---
+
+## Estrutura do projecto
+
+```
+VoiceCRM/
+├── VoiceCRM.xcodeproj
+└── VoiceCRM/
+    └── ContentView.swift      ← actualizar IP aqui (linha ~228)
+
+backend/
+├── server_v4.py               ← entry point, porta 5003
+├── pyproject.toml
+├── uv.lock
+├── .env                       ← GROQ_API_KEY (não commitar)
+│
+├── eval/                      ← avaliação comparativa de modelos LLM
+│   ├── eval_crm.py
+│   ├── eval_modelos.py
+│   ├── dataset_eval_voicecrm.json
+│   ├── dataset_golden_v3.json
+│   └── results/
+│       └── eval_results_*.json
+│
+├── metrics/                   ← scripts WER e DER por sessão
+│   ├── calc_der.py
+│   ├── calc_wer_r01.py
+│   └── ...calc_wer_r12.py
+│
+└── tests/
+    ├── test_moshi.py
+    ├── test_mps.py
+    └── test_resemblyzer.py
+```
+
+---
+
+## Checklist — sessão de trabalho típica
+
+```
+□ ipconfig getifaddr en0          → ver IP actual do Mac
+□ Actualizar IP em ContentView.swift
+□ cd backend && uv run python server_v4.py
+□ curl http://localhost:5003/health   → confirmar que arrancou
+□ Xcode → Build & Run no iPhone
+```
+
+---
+
+## Dependências principais
+
+| Pacote | Versão | Para quê |
+|---|---|---|
+| fastapi | ≥0.110 | servidor HTTP |
+| uvicorn | ≥0.29 | ASGI runner |
+| groq | ≥0.5 | API Llama 4 Scout |
+| torch | ≥2.2 | FluidAudio / MPS |
+| pyannote.audio | ≥3.1 | cálculo DER |
+| python-dotenv | ≥1.0 | variáveis de ambiente |
+
+Geridas via `pyproject.toml` — instalar com `uv sync`.
+
+---
+
+## Problemas frequentes
+
+**`Connection refused` no iPhone**
+→ IP desactualizado. Corre `ipconfig getifaddr en0` e actualiza `ContentView.swift`.
+
+**`GROQ_API_KEY not set`**
+→ Falta o ficheiro `.env` em `backend/`. Ver secção de configuração acima.
+
+**Servidor arranca mas diarização falha**
+→ Modelo FluidAudio ainda a descarregar. Aguarda e tenta de novo.
+
+**`MPS backend not available`**
+→ Estás num Mac Intel. Muda `"mps"` para `"cpu"` em `server_v4.py`.
